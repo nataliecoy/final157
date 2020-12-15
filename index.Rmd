@@ -1,0 +1,251 @@
+---
+title: "The accuracy of using van Wagtendonk (1996) woody fuel average diameters to estimate fuel load levels in mixed conifer forests in the Sierra Nevada"
+author: "Natalie Coy"
+date: "12/14/2020"
+output: 
+  html_document:
+    fig_caption: yes
+  
+---
+
+
+##Pilot Study Summary 
+
+  The aim of this study was to determine if using the van Wagtendonk (1996) approach for estimating fine woody debris mean diameters is an accurate approximation of actual fine woody debris mean diameters in mixed conifer forests in the Sierra Nevada. This pilot study used data collected in the summer of 2020 from Blodgett Forest Research Station to investigate this question. The data was collected by field technicians and included information on surrounding trees and fine woody debris diameter measurements. This pilot study focused on analyzing actual FWD diameters, calculating estimations of FWD diameters, and comparing these two variables. 
+
+   Starting in September, I began by cleaning the entire dataset. This consisted of confirming any assumptions about the data such as length, accurate plot and compartment numbers, and checking for missing or invalid data. Further, I organized the data into appropriate tables and identified data into time-lag fuel classes (1hr, 10hr, 100hr). Once the data was in a tidy format, I found the squared quadratic mean (QMD2) of the data, aggregated up to the plot level as this is the scale we had our tree data and would use to calculate our estimated FWD diameters. In October, I began analyzing our tree data. I used basal area measurements for each tree to calculate the percent of basal area (pBA) for each tree species. This would allow me to establish the prevalence of each tree species at the plot level.  After calculating the prevalence of each tree species I was able to estimate FWD mean diameters using the van Wagtendonk approach. The van Wagtendonk approach takes values that represent QMD2 for each tree species and their specific fuel class then multiples this by the tree species prevalence at each site to find the FWD mean diameters estimates. In December, I began comparing the actual QMD2 to the estimated QMD2.  To understand the relationship between the two variables, I broke the variables up by fuel time-lag class and then ran correlation tests and linear regressions.
+
+  My initial plan for this pilot study was to then take this analysis a step farther and look into fitting other models on the data to see if there was a better approach for estimating FWD mean diameters. However, this process took a lot longer than expected so I just finished running the linear regressions on the data. Therefore, I plan to finish this analysis in the spring semester next year. 
+
+##Background
+
+   During the last century, western US forests have seen fire supression. This has lead to increases in fuel loads which have left ecosystmes more vulnerable to high intensity fires and having a higher fire risk. Further, as changing climate conditions have led to increases in average air temperatures we are seeing longer fire seasons and shorter wet seasons. 
+
+  Fuel loads are one of the only parameters of fires which humans can control and manage. Forest managers uses management strategies to target fuel types and mitigate the effects of future fires. This project is specifically interested in prescribed fires which primarily target surface fuels as they break up spatial continuity along the forest floor. However, prior to implementing a prescribed burn fire management must predict potential fire behavior so that the burn does not get out of control or burn undesired plots. To predict fire behavior managers will use fire models which require explicit information on fuel characteristics. 
+  
+  This information will come from field surveys. The Brown protocol and moderations of it are a commonly used field method which uses planar intersect technique to estimate the levels of 1hr, 10hr, 100hr, and 1000hr fuel loads. However, within this method managers also require to measure individual fine woody debris diameters that tend to be very time consuming. Therefore, van Wagtendonk’s study went out into single species stands and measured mean diameters and forest composition so researcher would only have to measure forest composition through fairly simple and fast tree surveys than calculate estimated fwd mean diameters. While this method of estimating mean diameters is used frequently, it has never been tested for accuracy especially the estimates were made in single species stands yet are used throughout mixed conifer forest. 
+
+##Senior Thesis Research Questions
+  
+  This study will use actual fine woody debris diameters and estimated fine woody debris diameters to investigate van Wagtendonk's approach and address the following questions:
+  
+  How accurate is the van Wagtendonk (1996) approach for estimating fuel loads from forest composition in mixed conifer forest in the Sierra Nevada? 
+  1. What is the forest composition of our site and the actual FWD diameter measurements?
+  2. What are the estimated FWD diameters from using van Wagtendonk’s (1996) approach and how do these compare to our actual measurements? 
+  3. What is the best model for estimating fuel loads from forest composition in a mixed conifer forest? 
+
+**As mentioned previously, this pilot study only investigates the first two subquestions. 
+
+```{r setup, echo = FALSE, message=FALSE, warning=FALSE, results=FALSE}
+#knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE, results=FALSE, cache = TRUE)
+library(here)
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
+library(knitr)
+library(ggpubr)
+
+p_plot <- read_csv(here("data", "03-final", "p_plot.csv"), 
+         col_types = "ccnnnnnnn")
+
+fwd_plot <- 
+  read_csv(here("data", "03-final", "fwd_plots.csv"), 
+         col_types = "cccnn")
+
+output <- 
+  read_csv(here("data", "03-final", "output.csv"), col_types = "cnnnn")
+
+```
+
+##Pilot Study Results
+
+  First, this study investigated tree prevalence per plot. The results of this analysis can be viewed in Table 1. These percentages were later used to calculate squared quadratic mean diameters (QMD2) of estimated fine woody debris (FWD). As seen in Table 1, there was a high variance of forest composition across plots. Further, when aggregated up to compartment level there was also a decent amount of variance for which tree species had a higher prevalence compared to others. This is important to note as this variance may explain some of the results we are seeing in the linear regression and could be another question that is asked in this study. 
+
+```{r echo = FALSE, message=FALSE, warning=FALSE, fig.align='center'}
+
+kable(p_plot[],
+      digits = 3,
+      caption = "Table 1. Species prevalence broken up by plot level",
+      align = "c",
+      col.names = c('Comp', 'Plot', 'ABCO', 'CADE', 'Other', 'PILA', 'PIPO', 'PSME', 'SEGI'))
+
+```
+
+   Second, this study calculated actual fine woody debris (FWD) squared quadratic mean diameters (QMD2) as well as estimated FWD QMD2. The results of this are displayed in histograms in Figure 1. The histograms are broken up by fuel lag-class. As seen in Figure 1, estimated one hour fuels seem to be relatively similar to observed one hour fuels. From a first glance, this data shows that estimated one hour FWD QMD2 may be an accurate representation of actual one hour FWD QMD2. However, this does not seem to be true when looking at ten hour fuels. While observed ten hour fuels seem to have a majority of QMD2 in the range 1.5 cm2 to 2 cm2, estimated ten hour fuels are all lower than 1.5 cm2. This histogram suggests that van Wagtendonk’s approach may be underestimating ten hour FWD QMD2. Lastly, observed and estimated 100 hour fuels seem to have relatively similar values for QMD2. While the spread of estimated 100 hour QMD2 may be smaller than observed, both variables have a majority of their values between 15 cm2 and 20 cm2. 
+
+
+```{r echo = FALSE, message=FALSE, warning=FALSE, results=FALSE, fig.show='hide'}
+#First we will look QMD values 
+#observed 1hr vs estimated 1 hr 
+
+o_one_hr <- fwd_plot %>% 
+  filter(timelag_class == "1h") %>%
+  ggplot(aes(observed_qmd2_cm2)) +
+  labs(x = "Observed QMD2 (cm2) 1hr", y = "Count") +
+  geom_histogram(fill = "#56B4E9") + 
+  coord_cartesian(xlim = c(0.06, 0.16), ylim = c(0,3))+
+  theme_bw()
+
+e_one_hr <- fwd_plot %>% 
+  filter(timelag_class == "1h") %>%
+  ggplot(aes(estimated_qmd2_cm2)) +
+  labs(x="Estimated QMD2 (cm2) 1hr", y = "Count")+
+  geom_histogram(fill = "#E69F00")+ 
+  coord_cartesian(xlim = c(0.06, 0.16), ylim = c(0,3))+
+  theme_bw()
+
+A <- grid.arrange(o_one_hr, e_one_hr, ncol = 2)
+
+#observed 10h vs estimated 10 hr 
+o_ten_hr <- fwd_plot %>% 
+  filter(timelag_class == "10h") %>%
+  ggplot(aes(observed_qmd2_cm2)) +
+  labs(x = "Observed QMD2 (cm2) 10hr", y = "Count") +
+  geom_histogram(fill = "#56B4E9") + 
+  coord_cartesian(xlim = c(0.25, 2.25), ylim = c(0,3))+
+  theme_bw()
+
+e_ten_hr <- fwd_plot %>% 
+  filter(timelag_class == "10h") %>%
+  ggplot(aes(estimated_qmd2_cm2)) +
+  geom_histogram(fill = "#E69F00") +
+  labs(x = "Estimated QMD2 (cm2) 10hr", y = "Count") +
+  theme_bw()
+
+B <- grid.arrange(o_ten_hr, e_ten_hr, ncol = 2)
+
+#obseved 100hr vs estimated 100hr 
+o_hun_hr <- fwd_plot %>% 
+  filter(timelag_class == "100h") %>%
+  ggplot(aes(observed_qmd2_cm2)) +
+  geom_histogram(fill = "#56B4E9")+ 
+  coord_cartesian(xlim = c(2,50))+
+  labs(x = "Observed QMD2 (cm2) 100hr", y = "Count") +
+  theme_bw()
+
+e_hun_hr <- fwd_plot %>% 
+  filter(timelag_class == "100h") %>%
+  ggplot(aes(estimated_qmd2_cm2)) +
+  geom_histogram(fill = "#E69F00")+ 
+  coord_cartesian(xlim = c(2, 20),ylim = c(0,3))+
+  labs(x = "Estimated QMD2 (cm2) 100hr", y = "Count") +
+  theme_bw()
+
+C<- grid.arrange(o_hun_hr, e_hun_hr, ncol = 2)
+```
+
+```{r echo = FALSE, message=FALSE, warning=FALSE, results=FALSE, fig.align= 'center', fig.height= 10, fig.width= 7 ,fig.cap="\\label{fig:figs} Figure 1. Histograms of Measured and Estimated QMD2"}
+grid.arrange(A, B,C, nrow =3)
+```
+
+   The third and final aspect of this pilot study was to test these variables, actual and estimated FWD QMD2, in a linear regression to see if there is any significant relationship between the two. This analysis began with running a correlation between both variables for each fuel time-lag class. The correlation for one hour fuels was 0.5470003, the correlation for ten hour fuels was - 0.3801208, and the correlation for 100 hour fuels was 0.1425832. While none of these values were close to 1 or -1, suggesting a strong linear correlation, it was hard to conclude anything explicit from these values. Therefore, a linear regression model was run for each time-lag class comparing both actual and estimated values. The residuals for this model can be viewed in Figure 2. As seen in Figure 2, all three of the time-lag classes have residuals that fluctuate relatively evenly across zero and relatively dispersed along the x-axis, estimated QMD2. The statistical values from the linear regression model can be viewed in Table 2, whereas Figure 3 displays the results in a graph. As seen in Figure 3 and suspected from the previous histograms, estimated and observed one hour fuels have a statistically significantly linear relationship. Therefore, it is fair to conclude that van Wagtendonk’s approach for estimating FWD QMD2 is quite accurate for one hour fuel loads. Furthermore, ten hour fuels show no linear relationship between estimated and observed QMD2. As seen in Figure 3, it appears that van Wagtendonk’s approach for estimating FWD QMD2 underestimated ten hour fuels. Lastly, 100 hour fuels seem to be fairly represented by estimated QMD2 values. The linear regression falls very close to a perfectly linear model. That being said this model has particularly large standard error brackets where this may not be true when investigated further. 
+
+```{r echo = FALSE, message=FALSE, warning=FALSE, fig.align='center'}
+kable(output[], 
+      digits = c(0, 4, 4, 4, 4 ), 
+      align= "c",
+      caption = "Table 2. Statistical results from linear regression models for each fuel time-lag class",
+      col.names = c('Estimated QMD2', 'Estimate', 'Std. Error', 'Statistic', 'P value'))
+```
+```{r echo = FALSE, message=FALSE, warning=FALSE, results=FALSE, fig.align= 'center', fig.width= 4, fig.height=4,fig.cap="\\label{fig:figs} Figure 2A. Residuals for 1 hour fuels"}
+onehr_plot <- fwd_plot %>%
+  filter(timelag_class == "1h")
+tenhr_plot <- fwd_plot %>%
+  filter(timelag_class == "10h")
+hunhr_plot <- fwd_plot %>%
+  filter(timelag_class == "100h") 
+
+#one hour
+linear_onehr <- 
+  lm(observed_qmd2_cm2 ~ estimated_qmd2_cm2 + 0, data =  onehr_plot )
+
+E <- rstandard(linear_onehr)
+res1hr<- plot(y = E, x = onehr_plot$estimated_qmd2_cm2, 
+     xlab = "Estimated QMD(cm2) 1hr", ylab = "Residuals")
+
+```
+```{r echo = FALSE, message=FALSE, warning=FALSE, results=FALSE, fig.align= 'center', fig.width= 4, fig.height=4, fig.cap="\\label{fig:figs} Figure 2B. Residuals for 10 hour fuels"}
+#10hr
+linear_tenhr <- 
+  lm(observed_qmd2_cm2 ~ estimated_qmd2_cm2 + 0 ,data =  tenhr_plot )
+
+res10 <- residuals(linear_tenhr)
+
+#Looking at residuals 
+E <- rstandard(linear_tenhr)
+res10hr <- plot(y = E, x = tenhr_plot$estimated_qmd2_cm2, 
+     xlab = "Estimated QMD(cm2) 10hr", ylab = "Residuals")
+```
+```{r echo = FALSE, message=FALSE, warning=FALSE, results=FALSE, fig.align= 'center', fig.width= 4, fig.height=4, fig.cap="\\label{fig:figs} Figure 2C. Residuals for 100 hour fuels"}
+linear_hunhr <- 
+  lm(observed_qmd2_cm2 ~ estimated_qmd2_cm2,data =  hunhr_plot )
+
+E <- rstandard(linear_hunhr)
+
+res100hr <-plot(y = E, x = hunhr_plot$estimated_qmd2_cm2, 
+     xlab = "Estimated QMD(cm2) 100hr", ylab = "Residuals")
+```
+
+```{r echo = FALSE, message=FALSE, warning=FALSE, results=FALSE, fig.width= 10, fig.height=6 , fig.align= 'center', fig.cap="\\label{fig:figs} Figure 3. Linear relationship between estimated QMD2 (cm2) and measured QMD2 (cm2). From left to right; 1 hour fuel loads, 10 hour fuel loads and 100 hour fuel loads. The blue line represents the linear regression model for each time-lag class and the red dashed line represents a positive linear regression model."}
+onehr_plot <- fwd_plot %>%
+  filter(timelag_class == "1h") 
+
+pt1 <- onehr_plot %>%
+  ggplot(aes(estimated_qmd2_cm2, observed_qmd2_cm2)) + 
+  geom_point() + 
+  coord_fixed(ylim= c(-0.1, .2), xlim = c(-0.1, .2)) + 
+  geom_smooth(method = "lm") + 
+  geom_abline(intercept = 0, slope = 1, col = "red", lty = "dashed") +
+  theme_bw() +
+  labs(x = "Estimated QMD2 (cm2) for 1hr", y = "Observed QMD2 (cm2) for 1hr")
+ 
+tenhr_plot <- fwd_plot %>%
+  filter(timelag_class == "10h") 
+
+pt2 <- tenhr_plot %>%
+  ggplot(aes(estimated_qmd2_cm2, observed_qmd2_cm2)) + 
+  geom_point() + 
+  coord_fixed(ylim = c(0.5, 2.2), xlim = c(0.5, 2.2)) + 
+  geom_smooth(method = "lm") + 
+  geom_abline(intercept = 0, slope = 1, col = "red", lty = "dashed") + 
+  theme_bw() +
+  labs(x = "Estimated QMD2 (cm2) for 10hr", y = "Observed QMD2 (cm2) for 10hr")
+  
+hunhr_plot <- fwd_plot %>%
+  filter(timelag_class == "100h") 
+
+pt3 <- hunhr_plot%>%
+  ggplot(aes(estimated_qmd2_cm2, observed_qmd2_cm2)) + 
+  geom_point() + 
+  coord_fixed(ylim = c(7.5, 43), xlim = c(7.5, 43)) + 
+  geom_smooth(method = "lm") + 
+  geom_abline(intercept = 0, slope = 1, col = "red", lty = "dashed") +
+   theme_bw() +
+  labs(x = "Estimated QMD2 (cm2) 100hr", y = "Observed QMD2 (cm2) 100hr")
+
+grid.arrange(pt1,pt2, pt3, ncol = 3)
+```
+
+##Implications of Pilot Study 
+
+   This pilot study has taught me a lot about my data and how accurate the van Wagtendonk approach is. I plan to use this entire pilot study in my senior thesis as this analysis answers two of my sub research questions. This analysis answers the questions: (1) what is our study site’s forest composition and what are the actual fine woody debris mean diameters; (2) what are the estimated van Wagtendonk fine woody debris mean diameters and how do they compare to the observed diameters. 
+    
+    Moving forward, I want to read more about linear regressions to make sure that I am interpreting my results correctly. I think there is a lot of good data in Table 2, however, I am not exactly sure how to interpret everything that it is telling me. I think fully understanding these numbers will enable me to figure out the next steps in my analysis are. Further, I think it would be interesting to investigate the variance of forest composition at each plot and see if this is a contributing factor to the results we are seeing in the linear model. One current problem with my original study design is that I am letting my linear regression model find a y intercept value. This is only a problem for my 100 hour fuel model as it is the only one with a y-intercept that is significantly different from zero. The problem with having a y-intercept that is not zero is that it suggests you can have an estimated value of zero but an actual value of non-zero. This does not make any logical sense and needs to be corrected. I discussed previously with my mentor and a solution would be setting all models to have a y-intercept of zero so that I am consistent and my model makes logical sense. Lastly, I want to use the information I gained from this pilot study to test new models for estimating FWD QMD2 and see if there is a better method than van Wagtendonk found. 
+    
+##References 
+
+  Agee, J.K., B. Bahro, M. A. Finney, P. N. Omi, D. B. Sapsis, C. N. Skinner, J.W. van Wagtendonk, and C. P. Weatherspoon. 2000. The use of shaded fuel breaks in landscape fire management. Forest Ecology and Management 127: 55–66.
+
+  Brown, J.K. 1974. Handbook for inventorying downed woody material. Gen. Tech. Rep. INT-16. Ogden, UT: U.S. Department of Agriculture, Forest Service, Intermountain Forest Range and Range Experiment Station. 24 p.
+
+  Keane, R. E., K. Gray and V. Bacciu. 2012. Spatial variability of wildland fuel characteristics in northern Rocky Mountain ecosystems. Res. Pap. RMRS-RP-98. Fort Collins, CO: U. S. Department of Agriculture, Forest Service, Rocky Mountain Research Station. 56 p.
+
+  Keeley, J. E. and A. D. Syphard. 2019. Twenty-first century California, USA, wildfires: fuel-dominated vs wind-dominated fires. Fire Ecology 15. 
+
+  Stephen, S. L., and B. M. Collin. 2004. Fire regimes of mixed conifer forest in the north-central Sierra Nevada at multiple spatial scales. Northeast Science 78: 12-23.
+
+   Stephens, S. L., S. J. Husari, H. T. Nichols, N. G. Sugihara, and B. M. Collins. 2018. Fire and Fuel Management. Fire in California’s Ecosystems: 411-428. 
+
+  van Wagtendonk, J., J. M. Benedict, and W. M. Sydoriak. 1996. Physical properties of woody fuel particles of Sierra Nevada conifers. International Journal of Wildland Fire 6(3): 117-123. 
+
